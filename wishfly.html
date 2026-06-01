@@ -166,9 +166,9 @@
    WISHFLY — config
    ============================================================ */
 const CONFIG = {
-  // 1) Paste your Formspree endpoint here to start collecting real wishes.
-  //    Make one free at formspree.io, e.g. "https://formspree.io/f/abcdwxyz"
-  FORMSPREE: "",            // <-- LEAVE BLANK to test without sending
+  // 1) Paste your Google Apps Script web-app URL here (it ends in /exec).
+  //    That's where every wish gets saved. See Code.gs for the 5-step setup.
+  SHEET_URL: "https://script.google.com/macros/s/AKfycbxGzoPxrtr8qXviWVPBdiTJDlm6PV4YfsYrJu-4DRCFkRev64N-i3i_sGtcqz5IjB3d/exec",            // <-- LEAVE BLANK to test without sending
   CRUISE_MPH: 150,          // effective eVTOL speed incl. climb/descent
   VTOL_OVERHEAD_MIN: 2.5,   // takeoff + landing time
   PRICE_PER_MILE: 1.6       // demo LAPP fare; surges at peak below
@@ -364,9 +364,10 @@ async function recordWish(w){
     to_name:w.toName||'', drive_min:w.driveMin, fly_min:w.flyMin,
     miles:w.mi, peak:w.peak?1:0, ts:w.ts
   };
-  if(!CONFIG.FORMSPREE){ console.log('WISH (not sent — set CONFIG.FORMSPREE):',flat); return; }
+  if(!CONFIG.SHEET_URL){ console.log('WISH (not sent — set CONFIG.SHEET_URL):',flat); return; }
   try{
-    await fetch(CONFIG.FORMSPREE,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(flat)});
+    // text/plain + no-cors = no CORS preflight; reliable fire-and-forget to Apps Script
+    await fetch(CONFIG.SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(flat)});
   }catch(e){ console.warn('wish send failed',e); }
 }
 
