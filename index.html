@@ -98,6 +98,38 @@
   .datatag{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5b8b78;letter-spacing:.04em;margin-top:13px}
   .datatag .n{color:var(--sky2)}
 
+  /* wishing well */
+  .well{margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.07);text-align:center}
+  .wellscene{position:relative;height:74px;margin-bottom:6px}
+  .wellart{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:130px;height:76px;overflow:visible}
+  .wellart .water{fill:url(#wg);opacity:.9}
+  .wellart .rim{fill:none;stroke:#3a4a55;stroke-width:2}
+  .wellart .stone{fill:none;stroke:#2b3742;stroke-width:3;stroke-linecap:round}
+  .wellart .ripple{fill:none;stroke:var(--sky2);stroke-width:1.5;opacity:0}
+  .coin{position:absolute;left:50%;top:0;transform:translateX(-50%);font-size:22px;color:var(--hot2);
+    opacity:0;text-shadow:0 0 10px rgba(255,174,59,.6);z-index:3}
+  .coin.toss{animation:toss 1s cubic-bezier(.5,0,.7,1) forwards}
+  @keyframes toss{
+    0%{opacity:0;top:-6px;transform:translateX(-50%) scale(1) rotate(0)}
+    12%{opacity:1}
+    70%{opacity:1;top:34px;transform:translateX(-50%) scale(.7) rotate(420deg)}
+    100%{opacity:0;top:42px;transform:translateX(-50%) scale(.35) rotate(540deg)}
+  }
+  .ripple.go{animation:rip 1s ease-out .7s}
+  @keyframes rip{0%{opacity:.9;rx:5px;ry:1.5px}100%{opacity:0;rx:30px;ry:9px}}
+  .wellhead{font-family:'Bricolage Grotesque';font-weight:800;font-size:18px;line-height:1}
+  .wellsub{font-size:12px;color:#9aa3ac;margin:5px 0 7px;line-height:1.4}
+  .wellcount{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#caa45e;letter-spacing:.04em;margin:0 0 13px}
+  .wellbtn{width:100%;border:none;cursor:pointer;font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;
+    padding:15px;border-radius:15px;transition:transform .15s, opacity .3s;
+    background:linear-gradient(100deg,var(--hot2),var(--hot1));color:#1a0c06;
+    box-shadow:0 12px 28px -12px rgba(255,174,59,.5)}
+  .wellbtn:active{transform:scale(.97)}
+  .welldone{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--sky2);
+    max-height:0;opacity:0;overflow:hidden;transition:.5s}
+  .well.tossed .welldone{max-height:40px;opacity:1;margin-top:12px}
+  .well.tossed .wellbtn{opacity:.55}
+
   .toast{position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:50;
     background:#10181f;border:1px solid #243039;border-radius:12px;padding:10px 15px;font-size:12px;color:#cdd5dd;
     opacity:0;transition:.35s;pointer-events:none;max-width:88%;text-align:center;box-shadow:0 10px 30px -10px #000}
@@ -164,6 +196,28 @@
           <button class="alt" id="againBtn">New wish</button>
         </div>
         <div class="datatag">your wish became dot <span class="n" id="wishNum">#1</span> on the demand map</div>
+
+        <div class="well" id="well">
+          <div class="wellscene" id="wellScene">
+            <div class="coin" id="coin">𓂀</div>
+            <svg class="wellart" viewBox="0 0 120 70" aria-hidden="true">
+              <defs><radialGradient id="wg" cx="50%" cy="45%" r="60%">
+                <stop offset="0" stop-color="#3ee0ff"/><stop offset="1" stop-color="#0a2730"/>
+              </radialGradient></defs>
+              <ellipse class="water" cx="60" cy="40" rx="34" ry="11"/>
+              <ellipse class="rim" cx="60" cy="40" rx="40" ry="13"/>
+              <path class="stone" d="M22,40 Q22,64 60,64 Q98,64 98,40"/>
+              <ellipse class="ripple" id="ripple" cx="60" cy="40" rx="6" ry="2"/>
+            </svg>
+          </div>
+          <div class="welltext">
+            <div class="wellhead">make it real?</div>
+            <div class="wellsub">Toss a coin in the well — fund the actual flying car.</div>
+          </div>
+          <div class="wellcount" id="wellCount">🪙 be the first to toss a coin</div>
+          <button class="wellbtn" id="wellBtn">✦ Toss a coin</button>
+          <div class="welldone" id="wellDone">Thanks for the coin. The butterfly felt that one. 🦋</div>
+        </div>
       </div>
     </div>
   </div>
@@ -176,6 +230,15 @@ const CONFIG = {
   // 1) Paste your Google Apps Script web-app URL here (it ends in /exec).
   //    That's where every wish gets saved. See Code.gs for the 5-step setup.
   SHEET_URL: "https://script.google.com/macros/s/AKfycbyqmznvxUsTCtv_tsn4nuZspyw5D7S0-7SouHjizkngrymsK3gzag8oKTf7ByKpGLxXzQ/exec",
+  // 2) Wishing well: paste a Stripe Payment Link here to accept coins.
+  //    LEAVE BLANK until you've talked to your WIPA counselor — blank just
+  //    plays the animation without charging anyone.
+  WELL_URL: "",
+  // 3) Coins-tossed counter: a URL returning a real count (a plain number,
+  //    or a CSV whose rows are tosses). LEAVE BLANK and it honestly shows
+  //    "be the first" instead of a made-up number. See note below on how to
+  //    populate this for real (Stripe webhook → your sheet).
+  COINS_URL: "",
   CRUISE_MPH: 150,          // effective eVTOL speed incl. climb/descent
   VTOL_OVERHEAD_MIN: 2.5,   // takeoff + landing time
   PRICE_PER_MILE: 1.6       // demo LAPP fare; surges at peak below
@@ -355,12 +418,35 @@ $('againBtn').onclick=()=>{
   document.body.classList.remove('flying');
   $('statusTxt').textContent='rush hour';
   $('wishBtnTxt').textContent='Make the wish ✦';
+  $('well').classList.remove('tossed');
+  $('coin').classList.remove('toss');
+  $('ripple').classList.remove('go');
 };
 
 $('shareBtn').onclick=()=>{
   const txt=`I just "drove" ${$('driveTime').textContent} to go somewhere a flying car does in ${$('flyTime').textContent}. I want my Aeroboticar. 𓆟 #WISHFLY @LorenzAero`;
   if(navigator.share){ navigator.share({text:txt}).catch(()=>{}); }
   else { navigator.clipboard?.writeText(txt); toast('Rage copied — go vent on your feed 📸'); }
+};
+
+/* ---------- wishing well ---------- */
+async function loadCoinCount(){
+  if(!CONFIG.COINS_URL) return;                 // honest: no real source, no fake number
+  try{
+    const t=(await (await fetch(CONFIG.COINS_URL,{cache:'no-store'})).text()).trim();
+    let n=Number(t.replace(/[, ]/g,''));
+    if(!isFinite(n)) n=Math.max(0, t.split(/\r?\n/).filter(Boolean).length-1); // CSV rows minus header
+    if(n>0) $('wellCount').textContent=`🪙 ${n.toLocaleString()} coins tossed so far`;
+  }catch(e){}
+}
+$('wellBtn').onclick=()=>{
+  const coin=$('coin'), ripple=$('ripple'), well=$('well');
+  coin.classList.remove('toss'); ripple.classList.remove('go');
+  void coin.offsetWidth;                 // reflow so the animation can replay
+  coin.classList.add('toss'); ripple.classList.add('go');
+  setTimeout(()=>well.classList.add('tossed'), 900);
+  if(CONFIG.WELL_URL){ setTimeout(()=>window.open(CONFIG.WELL_URL,'_blank'), 1000); }
+  else { console.log('WELL: animation only — set CONFIG.WELL_URL to accept coins.'); }
 };
 
 /* ---------- send to the demand map ---------- */
@@ -379,6 +465,7 @@ async function recordWish(w){
 }
 
 /* ---------- go ---------- */
+loadCoinCount();
 tryLocate();
 </script>
 </body>
