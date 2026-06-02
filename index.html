@@ -445,8 +445,13 @@ $('wellBtn').onclick=()=>{
   void coin.offsetWidth;                 // reflow so the animation can replay
   coin.classList.add('toss'); ripple.classList.add('go');
   setTimeout(()=>well.classList.add('tossed'), 900);
-  if(CONFIG.WELL_URL){ setTimeout(()=>window.open(CONFIG.WELL_URL,'_blank'), 1000); }
-  else { console.log('WELL: animation only — set CONFIG.WELL_URL to accept coins.'); }
+  if(CONFIG.WELL_URL){
+    // same-tab redirect: mobile Safari + in-app browsers (Instagram, etc.) block
+    // window.open() that isn't fired directly by the tap — that's why no tab opened.
+    setTimeout(()=>{ window.location.href = CONFIG.WELL_URL; }, 1100);
+  } else {
+    console.log('WELL: animation only — set CONFIG.WELL_URL to accept coins.');
+  }
 };
 
 /* ---------- send to the demand map ---------- */
